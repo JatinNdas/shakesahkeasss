@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Reel Downloader</title>
+    <style>
+        body { 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: Arial, sans-serif; 
+            
+            /* THIS IS THE BACKGROUND IMAGE CODE */
+            background-image: url('/static/jatincat.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #050505; /* Fallback color */
+        }
+        
+        .glass-box { 
+            /* A dark, slightly see-through box so the text is readable over the cat image */
+            background: rgba(0, 0, 0, 0.85); 
+            padding: 40px; 
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0px 10px 30px rgba(0, 255, 65, 0.2);
+            color: white;
+        }
+        
+        h2 { margin-top: 0; color: #00ff41; }
+        p { color: #ccc; margin-bottom: 25px; }
+        
+        input { 
+            background: #222; 
+            border: 2px solid #555; 
+            color: white; 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 10px;
+            outline: none; 
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        
+        input:focus { border-color: #00ff41; }
+        
+        button { 
+            background: #00ff41; 
+            color: black; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 10px;
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px;
+            width: 100%;
+            transition: 0.2s;
+        }
+        
+        button:hover { background: #00cc33; }
+        button:disabled { background: #555; color: #888; cursor: wait; }
+        
+        #status { margin-top: 25px; min-height: 20px; font-weight: bold; }
+        
+        .download-btn { 
+            color: white; 
+            background: #ff0055; /* Makes the final download button pop out */
+            text-decoration: none; 
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-box">
+        <h2>Reel Downloader</h2>
+        <p>Paste the Instagram link below to get the video.</p>
+        
+        <input type="text" id="targetUrl" placeholder="Paste link here...">
+        <button id="execBtn" onclick="executeExtraction()">Get Video</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function executeExtraction() {
+            const url = document.getElementById('targetUrl').value;
+            const statusDiv = document.getElementById('status');
+            const btn = document.getElementById('execBtn');
+            
+            if (!url) {
+                statusDiv.innerHTML = "<span style='color: #ff4444;'>Please paste a link first.</span>";
+                return;
+            }
+
+            btn.disabled = true;
+            statusDiv.innerHTML = "<span style='color: #00ff41;'>Loading video... please wait.</span>";
+
+            try {
+                const res = await fetch('/extract', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                
+                const data = await res.json();
+                
+                if(data.success) {
+                    statusDiv.innerHTML = `<a href="${data.download_url}" target="_blank" class="download-btn">Click Here to Save Video</a>`;
+                } else {
+                    statusDiv.innerHTML = `<span style='color: #ff4444;'>Error: Couldn't find video. Is the account private?</span>`;
+                }
+            } catch (err) {
+                statusDiv.innerHTML = `<span style='color: #ff4444;'>Connection error. Try again.</span>`;
+            }
+            
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
