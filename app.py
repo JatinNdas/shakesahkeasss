@@ -37,7 +37,7 @@ def get_video_url_from_api(insta_url):
 @app.route('/')
 def index():
     return render_template('index.html')
-
+print("shitttttttt")
 @app.route('/extract', methods=['POST'])
 def extract():
     data = request.json
